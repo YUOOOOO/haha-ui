@@ -1,0 +1,27 @@
+{
+  "name": "ha-homeui",
+  "version": "0.1.0",
+  "description": "3D Home Floor Plan with Three.js and Home Assistant API",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "three.js",
+    "home-assistant",
+    "3d",
+    "floor-plan",
+    "smart-home"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.163.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.61.1",
+    "vite": "^5.2.0"
+  }
+}

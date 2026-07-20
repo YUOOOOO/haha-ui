@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>GLB 模型分析</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    #info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #444;
+    }
+    .title {
+      color: #4CAF50;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .item {
+      margin-left: 10px;
+      color: #aaa;
+    }
+    .highlight {
+      color: #FFD700;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="info">
+    <div class="title">正在加载模型...</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three'
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+
+    const info = document.getElementById('info')
+    const container = document.getElementById('canvas-container')
+
+    // 设置场景
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x1a1a1a)
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.set(10, 10, 10)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    container.appendChild(renderer.domElement)
+
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+
+    // 灯光
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
+    scene.add(ambientLight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    directionalLight.position.set(10, 20, 10)
+    scene.add(directionalLight)
+
+    // 网格
+    const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x333333)
+    scene.add(gridHelper)
+
+    // 加载 GLB
+    const loader = new GLTFLoader()
+    loader.load('/models/huxingtu.glb', (gltf) => {
+      const model = gltf.scene
+      scene.add(model)
+
+      // 分析模型
+      let html = '<div class="section"><div class="title">📦 GLB 模型分析</div></div>'
+
+      // 基本信息
+      html += '<div class="section">'
+      html += '<div class="title">基本信息</div>'
+      html += `<div class="item">动画数量: <span class="highlight">${gltf.animations.length}</span></div>`
+      html += `<div class="item">相机数量: <span class="highlight">${gltf.cameras.length}</span></div>`
+      html += '</div>'
+
+      // 边界盒
+      const box = new THREE.Box3().setFromObject(model)
+      const size = box.getSize(new THREE.Vector3())
+      const center = box.getCenter(new THREE.Vector3())
+
+      html += '<div class="section">'
+      html += '<div class="title">模型尺寸</div>'
+      html += `<div class="item">宽度: <span class="highlight">${size.x.toFixed(2)}</span></div>`
+      html += `<div class="item">高度: <span class="highlight">${size.y.toFixed(2)}</span></div>`
+      html += `<div class="item">深度: <span class="highlight">${size.z.toFixed(2)}</span></div>`
+      html += `<div class="item">中心: (${center.x.toFixed(2)}, ${center.y.toFixed(2)}, ${center.z.toFixed(2)})</div>`
+      html += '</div>'
+
+      // 遍历所有对象
+      const objects = []
+      const materials = new Set()
+      const geometries = new Map()
+
+      model.traverse((child) => {
+        if (child.isMesh) {
+          objects.push({
+            name: child.name || '未命名',
+            type: child.geometry.type,
+            vertices: child.geometry.attributes.position?.count || 0,
+            material: child.material.name || child.material.type
+          })
+          
+          if (child.material) {
+            materials.add(child.material.name || child.material.type)
+          }
+
+          const geoType = child.geometry.type
+          geometries.set(geoType, (geometries.get(geoType) || 0) + 1)
+        }
+      })
+
+      html += '<div class="section">'
+      html += '<div class="title">对象统计</div>'
+      html += `<div class="item">总对象数: <span class="highlight">${objects.length}</span></div>`
+      html += `<div class="item">材质数: <span class="highlight">${materials.size}</span></div>`
+      html += '</div>'
+
+      html += '<div class="section">'
+      html += '<div class="title">几何体类型</div>'
+      geometries.forEach((count, type) => {
+        html += `<div class="item">${type}: <span class="highlight">${count}</span></div>`
+      })
+      html += '</div>'
+
+      html += '<div class="section">'
+      html += '<div class="title">对象列表 (前20个)</div>'
+      objects.slice(0, 20).forEach((obj, i) => {
+        html += `<div class="item">${i + 1}. ${obj.name}</div>`
+        html += `<div class="item" style="margin-left: 20px; font-size: 11px;">顶点: ${obj.vertices}, 材质: ${obj.material}</div>`
+      })
+      if (objects.length > 20) {
+        html += `<div class="item">... 还有 ${objects.length - 20} 个对象</div>`
+      }
+      html += '</div>'
+
+      info.innerHTML = html
+
+      // 调整相机
+      camera.position.set(size.x * 1.5, size.y * 1.5, size.z * 1.5)
+      camera.lookAt(center)
+      controls.target.copy(center)
+      controls.update()
+
+    }, (progress) => {
+      const percent = (progress.loaded / progress.total * 100).toFixed(1)
+      info.innerHTML = `<div class="title">加载中... ${percent}%</div>`
+    }, (error) => {
+      info.innerHTML = `<div class="title" style="color: #f44336;">加载失败: ${error.message}</div>`
+      console.error(error)
+    })
+
+    // 动画循环
+    function animate() {
+      requestAnimationFrame(animate)
+      controls.update()
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    })
+  </script>
+</body>
+</html>

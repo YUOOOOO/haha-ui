@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>户型图墙线矢量图</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 20px;
+    }
+    #floorplan {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .wall {
+      fill: none;
+      stroke: #333;
+      stroke-width: 4;
+      stroke-linecap: square;
+    }
+    .room-bg {
+      fill: #fafafa;
+      stroke: none;
+    }
+    .room-bg:hover {
+      fill: #e3f2fd;
+      cursor: pointer;
+    }
+    .room-bg.active {
+      fill: #bbdefb;
+    }
+    .room-label {
+      font-size: 18px;
+      fill: #333;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+      user-select: none;
+      font-weight: 500;
+    }
+    .door {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 6;
+      stroke-linecap: butt;
+    }
+    .door-line {
+      fill: none;
+      stroke: #8b4513;
+      stroke-width: 2;
+    }
+    .window {
+      fill: none;
+      stroke: #4fc3f7;
+      stroke-width: 6;
+      stroke-linecap: butt;
+    }
+    .dimension {
+      font-size: 12px;
+      fill: #999;
+      text-anchor: middle;
+    }
+    .info-panel {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      min-height: 80px;
+    }
+    .info-panel h3 {
+      margin-bottom: 10px;
+      color: #1976D2;
+    }
+    .info-panel p {
+      margin: 5px 0;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>户型图墙线矢量图</h1>
+    <svg id="floorplan" viewBox="0 0 1080 2341" xmlns="http://www.w3.org/2000/svg">
+      
+      <!-- 房间背景（用于交互） -->
+      <rect class="room-bg" data-room="厨房" x="50" y="50" width="370" height="510"/>
+      <rect class="room-bg" data-room="书房" x="420" y="50" width="610" height="510"/>
+      <rect class="room-bg" data-room="客厅" x="50" y="560" width="370" height="680"/>
+      <rect class="room-bg" data-room="储物间" x="420" y="560" width="330" height="240"/>
+      <rect class="room-bg" data-room="玄关" x="750" y="560" width="280" height="240"/>
+      <rect class="room-bg" data-room="客卫" x="420" y="800" width="610" height="440"/>
+      <rect class="room-bg" data-room="餐厅" x="50" y="1240" width="370" height="480"/>
+      <rect class="room-bg" data-room="主卧" x="420" y="1240" width="610" height="480"/>
+      <rect class="room-bg" data-room="阳台" x="50" y="1720" width="370" height="570"/>
+      <rect class="room-bg" data-room="主卫" x="420" y="1720" width="610" height="570"/>
+      
+      <!-- 外墙 -->
+      <line class="wall" x1="50" y1="50" x2="1030" y2="50"/>
+      <line class="wall" x1="1030" y1="50" x2="1030" y2="2290"/>
+      <line class="wall" x1="1030" y1="2290" x2="50" y2="2290"/>
+      <line class="wall" x1="50" y1="2290" x2="50" y2="50"/>
+      
+      <!-- 主要垂直内墙 -->
+      <line class="wall" x1="420" y1="50" x2="420" y2="560"/>
+      <line class="wall" x1="420" y1="560" x2="420" y2="800"/>
+      <line class="wall" x1="420" y1="800" x2="420" y2="1240"/>
+      <line class="wall" x1="420" y1="1240" x2="420" y2="1720"/>
+      <line class="wall" x1="420" y1="1720" x2="420" y2="2290"/>
+      
+      <!-- 主要水平内墙 -->
+      <line class="wall" x1="50" y1="560" x2="420" y2="560"/>
+      <line class="wall" x1="420" y1="560" x2="1030" y2="560"/>
+      
+      <line class="wall" x1="420" y1="800" x2="750" y2="800"/>
+      <line class="wall" x1="750" y1="800" x2="1030" y2="800"/>
+      
+      <line class="wall" x1="50" y1="1240" x2="420" y2="1240"/>
+      <line class="wall" x1="420" y1="1240" x2="1030" y2="1240"/>
+      
+      <line class="wall" x1="50" y1="1720" x2="420" y2="1720"/>
+      <line class="wall" x1="420" y1="1720" x2="1030" y2="1720"/>
+      
+      <!-- 储物间与玄关之间的墙 -->
+      <line class="wall" x1="750" y1="560" x2="750" y2="800"/>
+      
+      <!-- 门洞（用白色覆盖墙线） -->
+      <line class="door" x1="200" y1="560" x2="280" y2="560"/>
+      <line class="door-line" x1="200" y1="560" x2="240" y2="520"/>
+      
+      <line class="door" x1="320" y1="560" x2="380" y2="560"/>
+      
+      <line class="door" x1="580" y1="560" x2="640" y2="560"/>
+      
+      <line class="door" x1="850" y1="800" x2="910" y2="800"/>
+      
+      <line class="door" x1="520" y1="800" x2="580" y2="800"/>
+      
+      <line class="door" x1="200" y1="1240" x2="260" y2="1240"/>
+      
+      <line class="door" x1="650" y1="1240" x2="710" y2="1240"/>
+      
+      <line class="door" x1="200" y1="1720" x2="260" y2="1720"/>
+      
+      <line class="door" x1="650" y1="1720" x2="710" y2="1720"/>
+      
+      <!-- 窗户 -->
+      <line class="window" x1="120" y1="50" x2="280" y2="50"/>
+      <line class="window" x1="600" y1="50" x2="850" y2="50"/>
+      <line class="window" x1="50" y1="850" x2="50" y2="1050"/>
+      <line class="window" x1="120" y1="2290" x2="280" y2="2290"/>
+      <line class="window" x1="600" y1="2290" x2="850" y2="2290"/>
+      <line class="window" x1="1030" y1="1400" x2="1030" y2="1600"/>
+      
+      <!-- 房间标签 -->
+      <text class="room-label" x="235" y="305">厨房</text>
+      <text class="room-label" x="725" y="305">书房</text>
+      <text class="room-label" x="235" y="900">客厅</text>
+      <text class="room-label" x="585" y="680">储物间</text>
+      <text class="room-label" x="890" y="680">玄关</text>
+      <text class="room-label" x="725" y="1020">客卫</text>
+      <text class="room-label" x="235" y="1480">餐厅</text>
+      <text class="room-label" x="725" y="1480">主卧</text>
+      <text class="room-label" x="235" y="2005">阳台</text>
+      <text class="room-label" x="725" y="2005">主卫</text>
+      
+    </svg>
+    
+    <div class="info-panel" id="info">
+      <h3>户型图信息</h3>
+      <p>点击房间查看详情</p>
+      <p>蓝色线条：窗户 | 白色断开：门</p>
+    </div>
+  </div>
+
+  <script>
+    const rooms = document.querySelectorAll('.room-bg')
+    const infoPanel = document.getElementById('info')
+    
+    const roomInfo = {
+      '厨房': { area: '8㎡', size: '3.7m × 5.1m' },
+      '书房': { area: '10㎡', size: '6.1m × 5.1m' },
+      '客厅': { area: '25㎡', size: '3.7m × 6.8m' },
+      '储物间': { area: '4㎡', size: '3.3m × 2.4m' },
+      '玄关': { area: '3㎡', size: '2.8m × 2.4m' },
+      '客卫': { area: '6㎡', size: '6.1m × 4.4m' },
+      '餐厅': { area: '15㎡', size: '3.7m × 4.8m' },
+      '主卧': { area: '18㎡', size: '6.1m × 4.8m' },
+      '阳台': { area: '6㎡', size: '3.7m × 5.7m' },
+      '主卫': { area: '8㎡', size: '6.1m × 5.7m' }
+    }
+    
+    rooms.forEach(room => {
+      room.addEventListener('click', function() {
+        rooms.forEach(r => r.classList.remove('active'))
+        this.classList.add('active')
+        
+        const roomName = this.dataset.room
+        const info = roomInfo[roomName]
+        
+        infoPanel.innerHTML = `
+          <h3>${roomName}</h3>
+          <p>面积：${info.area}</p>
+          <p>尺寸：${info.size}</p>
+          <p>点击其他房间查看更多信息</p>
+        `
+      })
+      
+      room.addEventListener('mouseenter', function() {
+        if (!this.classList.contains('active')) {
+          const roomName = this.dataset.room
+          const info = roomInfo[roomName]
+          infoPanel.innerHTML = `
+            <h3>${roomName}</h3>
+            <p>面积：${info.area} | 尺寸：${info.size}</p>
+            <p>点击查看详细信息</p>
+          `
+        }
+      })
+    })
+  </script>
+</body>
+</html>

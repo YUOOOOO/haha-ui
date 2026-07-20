@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设置 - HA Home UI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .settings-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .settings-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .settings-content {
+      padding: 32px;
+    }
+
+    .settings-section {
+      margin-bottom: 32px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group input[type="password"] {
+      font-family: monospace;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .form-group .hint {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-danger {
+      background: #ff4757;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #ff3838;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 24px 0;
+    }
+
+    .api-key-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .api-key-toggle button {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .api-key-toggle button:hover {
+      background: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 0;
+      }
+
+      .settings-container {
+        border-radius: 0;
+        min-height: 100vh;
+      }
+
+      .settings-content {
+        padding: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1>⚙️ 设置</h1>
+      <button class="close-btn" onclick="closeSettings()">×</button>
+    </div>
+
+    <div class="settings-content">
+      <div id="message" class="message"></div>
+
+      <!-- 天气配置 -->
+      <div class="settings-section">
+        <h2 class="section-title">🌤️ 天气服务</h2>
+
+        <div class="form-group">
+          <label for="weather-provider">天气服务提供商</label>
+          <select id="weather-provider" onchange="onProviderChange()">
+            <option value="wttr">wttr.in（免费，无需注册）</option>
+            <option value="qweather">和风天气（推荐国内用户）</option>
+            <option value="openweather">OpenWeatherMap</option>
+          </select>
+          <small id="provider-hint"></small>
+        </div>
+
+        <div class="form-group" id="api-key-group" style="display: none;">
+          <label for="weather-api-key">API Key</label>
+          <input type="password" id="weather-api-key" placeholder="请输入 API Key">
+          <div class="api-key-toggle">
+            <button onclick="toggleApiKeyVisibility()">👁️ 显示/隐藏</button>
+          </div>
+          <div class="hint" id="api-key-hint"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="weather-location">位置</label>
+          <input type="text" id="weather-location" placeholder="auto（自动定位）或城市名称">
+          <small>留空或输入 "auto" 使用自动定位，或输入城市名称如 "Beijing"</small>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Home Assistant 配置 -->
+      <div class="settings-section">
+        <h2 class="section-title">🏠 Home Assistant</h2>
+
+        <div class="form-group">
+          <label for="ha-base-url">服务器地址</label>
+          <input type="text" id="ha-base-url" placeholder="http://homeassistant.local:8123">
+          <small>Home Assistant 服务器的完整地址，包括端口号</small>
+        </div>
+
+        <div class="form-group">
+          <label for="ha-token">访问令牌</label>
+          <input type="password" id="ha-token" placeholder="长期访问令牌">
+          <div class="api-key-toggle">
+            <button onclick="toggleHATokenVisibility()">👁️ 显示/隐藏</button>
+          </div>
+          <div class="hint">
+            在 Home Assistant 中创建长期访问令牌：<br>
+            个人资料 → 安全 → 长期访问令牌 → 创建令牌
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 显示配置 -->
+      <div class="settings-section">
+        <h2 class="section-title">🎨 显示设置</h2>
+
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="show-weather">
+          <label for="show-weather">显示天气信息</label>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="show-date">
+          <label for="show-date">显示日期</label>
+        </div>
+
+        <div class="form-group">
+          <label for="time-format">时间格式</label>
+          <select id="time-format">
+            <option value="24h">24小时制</option>
+            <option value="12h">12小时制</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="temperature-unit">温度单位</label>
+          <select id="temperature-unit">
+            <option value="celsius">摄氏度 (°C)</option>
+            <option value="fahrenheit">华氏度 (°F)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 按钮组 -->
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="saveSettings()">💾 保存设置</button>
+        <button class="btn btn-secondary" onclick="resetSettings()">🔄 恢复默认</button>
+        <button class="btn btn-secondary" onclick="testConnection()">🔌 测试连接</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import SettingsManager from './src/utils/SettingsManager.js'
+
+    const settingsManager = new SettingsManager()
+    let currentSettings = settingsManager.getSettings()
+
+    // 加载设置到表单
+    function loadSettingsToForm() {
+      // 天气配置
+      document.getElementById('weather-provider').value = currentSettings.weather.provider
+      document.getElementById('weather-api-key').value = currentSettings.weather.apiKey
+      document.getElementById('weather-location').value = currentSettings.weather.location
+
+      // Home Assistant 配置
+      document.getElementById('ha-base-url').value = currentSettings.homeAssistant.baseUrl
+      document.getElementById('ha-token').value = currentSettings.homeAssistant.token
+
+      // 显示配置
+      document.getElementById('show-weather').checked = currentSettings.display.showWeather
+      document.getElementById('show-date').checked = currentSettings.display.showDate
+      document.getElementById('time-format').value = currentSettings.display.timeFormat
+      document.getElementById('temperature-unit').value = currentSettings.display.temperatureUnit
+
+      // 更新提供商相关UI
+      onProviderChange()
+    }
+
+    // 提供商改变时更新UI
+    window.onProviderChange = function() {
+      const provider = document.getElementById('weather-provider').value
+      const apiKeyGroup = document.getElementById('api-key-group')
+      const providerHint = document.getElementById('provider-hint')
+      const apiKeyHint = document.getElementById('api-key-hint')
+
+      if (provider === 'wttr') {
+        apiKeyGroup.style.display = 'none'
+        providerHint.textContent = '✅ 免费服务，无需注册'
+      } else if (provider === 'qweather') {
+        apiKeyGroup.style.display = 'block'
+        providerHint.textContent = '需要注册获取 API Key'
+        apiKeyHint.innerHTML = '注册地址：<a href="https://dev.qweather.com/" target="_blank">https://dev.qweather.com/</a><br>免费额度：每天 1000 次请求'
+      } else if (provider === 'openweather') {
+        apiKeyGroup.style.display = 'block'
+        providerHint.textContent = '需要注册获取 API Key'
+        apiKeyHint.innerHTML = '注册地址：<a href="https://openweathermap.org/api" target="_blank">https://openweathermap.org/api</a><br>免费额度：每分钟 60 次请求'
+      }
+    }
+
+    // 切换 API Key 可见性
+    window.toggleApiKeyVisibility = function() {
+      const input = document.getElementById('weather-api-key')
+      input.type = input.type === 'password' ? 'text' : 'password'
+    }
+
+    // 切换 HA Token 可见性
+    window.toggleHATokenVisibility = function() {
+      const input = document.getElementById('ha-token')
+      input.type = input.type === 'password' ? 'text' : 'password'
+    }
+
+    // 显示消息
+    function showMessage(text, type = 'success') {
+      const message = document.getElementById('message')
+      message.textContent = text
+      message.className = `message ${type} show`
+      setTimeout(() => {
+        message.classList.remove('show')
+      }, 3000)
+    }
+
+    // 保存设置
+    window.saveSettings = function() {
+      const newSettings = {
+        weather: {
+          provider: document.getElementById('weather-provider').value,
+          apiKey: document.getElementById('weather-api-key').value,
+          location: document.getElementById('weather-location').value || 'auto'
+        },
+        homeAssistant: {
+          baseUrl: document.getElementById('ha-base-url').value,
+          token: document.getElementById('ha-token').value
+        },
+        display: {
+          showWeather: document.getElementById('show-weather').checked,
+          showDate: document.getElementById('show-date').checked,
+          timeFormat: document.getElementById('time-format').value,
+          temperatureUnit: document.getElementById('temperature-unit').value
+        }
+      }
+
+      if (settingsManager.saveSettings(newSettings)) {
+        currentSettings = newSettings
+        showMessage('✅ 设置已保存，刷新页面后生效', 'success')
+      } else {
+        showMessage('❌ 保存失败，请重试', 'error')
+      }
+    }
+
+    // 恢复默认设置
+    window.resetSettings = function() {
+      if (confirm('确定要恢复默认设置吗？')) {
+        settingsManager.resetToDefaults()
+        currentSettings = settingsManager.getSettings()
+        loadSettingsToForm()
+        showMessage('✅ 已恢复默认设置', 'success')
+      }
+    }
+
+    // 测试连接
+    window.testConnection = async function() {
+      const baseUrl = document.getElementById('ha-base-url').value
+      const token = document.getElementById('ha-token').value
+
+      if (!baseUrl || !token) {
+        showMessage('⚠️ 请先填写服务器地址和访问令牌', 'error')
+        return
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/api/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          showMessage(`✅ 连接成功！Home Assistant 版本: ${data.version}`, 'success')
+        } else {
+          showMessage(`❌ 连接失败：HTTP ${response.status}`, 'error')
+        }
+      } catch (error) {
+        showMessage(`❌ 连接失败：${error.message}`, 'error')
+      }
+    }
+
+    // 关闭设置页面（同页打开时 window.close 无效，直接回首页）
+    window.closeSettings = function() {
+      window.location.href = '/index.html'
+    }
+
+    // 页面加载时加载设置
+    loadSettingsToForm()
+  </script>
+</body>
+</html>

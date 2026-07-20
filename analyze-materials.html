@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>GLB 材质和贴图分析</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    #info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.6;
+      z-index: 100;
+    }
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #444;
+    }
+    .title {
+      color: #4CAF50;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .item {
+      margin-left: 10px;
+      color: #aaa;
+    }
+    .highlight {
+      color: #FFD700;
+    }
+    .error {
+      color: #f44336;
+    }
+    .warning {
+      color: #ff9800;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="info">
+    <div class="title">正在加载模型...</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three'
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+
+    const info = document.getElementById('info')
+    const container = document.getElementById('canvas-container')
+
+    // 设置场景
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x1a1a1a)
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.set(10, 10, 10)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    container.appendChild(renderer.domElement)
+
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+
+    // 灯光
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+    scene.add(ambientLight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6)
+    directionalLight.position.set(10, 20, 10)
+    scene.add(directionalLight)
+
+    // 网格
+    const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x333333)
+    scene.add(gridHelper)
+
+    // 加载 GLB
+    const loader = new GLTFLoader()
+    loader.load('/models/huxingtu.glb', (gltf) => {
+      const model = gltf.scene
+      model.scale.set(10, 10, 10)  // 放大10倍
+      scene.add(model)
+
+      // 分析材质和贴图
+      let html = '<div class="section"><div class="title">📦 GLB 材质和贴图分析</div></div>'
+
+      const materials = []
+      const textures = []
+      let missingTextures = 0
+
+      model.traverse((child) => {
+        if (child.isMesh && child.material) {
+          const mat = child.material
+          
+          const matInfo = {
+            name: mat.name || '未命名',
+            type: mat.type,
+            color: mat.color ? `rgb(${Math.round(mat.color.r*255)}, ${Math.round(mat.color.g*255)}, ${Math.round(mat.color.b*255)})` : 'N/A',
+            map: null,
+            normalMap: null,
+            roughnessMap: null,
+            metalnessMap: null,
+            aoMap: null,
+            emissiveMap: null
+          }
+
+          // 检查各种贴图
+          if (mat.map) {
+            matInfo.map = mat.map.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.map.image) missingTextures++
+            textures.push({ type: 'map', texture: mat.map })
+          }
+          if (mat.normalMap) {
+            matInfo.normalMap = mat.normalMap.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.normalMap.image) missingTextures++
+            textures.push({ type: 'normalMap', texture: mat.normalMap })
+          }
+          if (mat.roughnessMap) {
+            matInfo.roughnessMap = mat.roughnessMap.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.roughnessMap.image) missingTextures++
+            textures.push({ type: 'roughnessMap', texture: mat.roughnessMap })
+          }
+          if (mat.metalnessMap) {
+            matInfo.metalnessMap = mat.metalnessMap.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.metalnessMap.image) missingTextures++
+            textures.push({ type: 'metalnessMap', texture: mat.metalnessMap })
+          }
+          if (mat.aoMap) {
+            matInfo.aoMap = mat.aoMap.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.aoMap.image) missingTextures++
+            textures.push({ type: 'aoMap', texture: mat.aoMap })
+          }
+          if (mat.emissiveMap) {
+            matInfo.emissiveMap = mat.emissiveMap.image ? '✅ 已加载' : '❌ 缺失'
+            if (!mat.emissiveMap.image) missingTextures++
+            textures.push({ type: 'emissiveMap', texture: mat.emissiveMap })
+          }
+
+          materials.push(matInfo)
+        }
+      })
+
+      // 统计信息
+      html += '<div class="section">'
+      html += '<div class="title">统计信息</div>'
+      html += `<div class="item">材质数量: <span class="highlight">${materials.length}</span></div>`
+      html += `<div class="item">贴图数量: <span class="highlight">${textures.length}</span></div>`
+      if (missingTextures > 0) {
+        html += `<div class="item error">❌ 缺失贴图: ${missingTextures}</div>`
+      } else if (textures.length > 0) {
+        html += `<div class="item">✅ 所有贴图已加载</div>`
+      } else {
+        html += `<div class="item warning">⚠️ 模型没有贴图（仅使用颜色）</div>`
+      }
+      html += '</div>'
+
+      // 材质详情
+      materials.forEach((mat, i) => {
+        html += '<div class="section">'
+        html += `<div class="title">材质 ${i + 1}: ${mat.name}</div>`
+        html += `<div class="item">类型: <span class="highlight">${mat.type}</span></div>`
+        html += `<div class="item">颜色: <span class="highlight">${mat.color}</span></div>`
+        
+        if (mat.map) html += `<div class="item">漫反射贴图 (map): ${mat.map}</div>`
+        if (mat.normalMap) html += `<div class="item">法线贴图 (normalMap): ${mat.normalMap}</div>`
+        if (mat.roughnessMap) html += `<div class="item">粗糙度贴图 (roughnessMap): ${mat.roughnessMap}</div>`
+        if (mat.metalnessMap) html += `<div class="item">金属度贴图 (metalnessMap): ${mat.metalnessMap}</div>`
+        if (mat.aoMap) html += `<div class="item">AO贴图 (aoMap): ${mat.aoMap}</div>`
+        if (mat.emissiveMap) html += `<div class="item">自发光贴图 (emissiveMap): ${mat.emissiveMap}</div>`
+        
+        if (!mat.map && !mat.normalMap && !mat.roughnessMap && !mat.metalnessMap && !mat.aoMap && !mat.emissiveMap) {
+          html += `<div class="item warning">⚠️ 此材质没有任何贴图</div>`
+        }
+        html += '</div>'
+      })
+
+      // 贴图详情
+      if (textures.length > 0) {
+        html += '<div class="section">'
+        html += '<div class="title">贴图详情</div>'
+        textures.forEach((tex, i) => {
+          const t = tex.texture
+          if (t.image) {
+            html += `<div class="item">${i + 1}. ${tex.type}: ${t.image.width}x${t.image.height}</div>`
+            html += `<div class="item" style="margin-left: 20px; font-size: 11px;">源: ${t.image.src || t.image.currentSrc || 'embedded'}</div>`
+          } else {
+            html += `<div class="item error">${i + 1}. ${tex.type}: ❌ 图片未加载</div>`
+          }
+        })
+        html += '</div>'
+      }
+
+      info.innerHTML = html
+
+      // 调整相机
+      const box = new THREE.Box3().setFromObject(model)
+      const size = box.getSize(new THREE.Vector3())
+      const center = box.getCenter(new THREE.Vector3())
+      const maxDim = Math.max(size.x, size.y, size.z)
+      
+      camera.position.set(maxDim * 1.2, maxDim * 0.8, maxDim * 1.2)
+      camera.lookAt(center)
+      controls.target.copy(center)
+      controls.update()
+
+    }, (progress) => {
+      const percent = (progress.loaded / progress.total * 100).toFixed(1)
+      info.innerHTML = `<div class="title">加载中... ${percent}%</div>`
+    }, (error) => {
+      info.innerHTML = `<div class="title error">加载失败: ${error.message}</div>`
+      console.error(error)
+    })
+
+    // 动画循环
+    function animate() {
+      requestAnimationFrame(animate)
+      controls.update()
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    })
+  </script>
+</body>
+</html>
