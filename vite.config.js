@@ -2,18 +2,28 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
+  // 部署到 HA /local/3d-home/ 时用相对资源路径
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3010,
     open: false,
-    // 允许 FRP 域名 / 任意 Host 访问（否则外网会 403 Blocked request）
     allowedHosts: true,
     proxy: {
+      // 开发走局域网 HA，更稳；公网可改 https://ha.yuchaoqun.com
       '/api': {
-        target: 'https://ha.yuchaoqun.com',
+        target: 'http://10.10.10.202:8123',
         changeOrigin: true,
-        secure: true,
+        secure: false,
         ws: true
+      },
+      // mijiaAPI 本地桥（见 /tmp/ha-homeui/mijia-bridge）
+      '/mijia': {
+        target: 'http://127.0.0.1:8787',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/mijia/, '')
       }
     }
   },
@@ -28,8 +38,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        settings: resolve(__dirname, 'settings.html')
+        main: resolve(__dirname, 'index.html')
       }
     }
   }

@@ -74,10 +74,12 @@ class WeatherService {
     }
 
     const now = data.now
+    const condition = this.mapQWeatherCondition(now.icon)
     return {
       temperature: parseInt(now.temp),
-      condition: this.mapQWeatherCondition(now.icon),
-      conditionText: now.text,
+      condition,
+      // 和风 now.text 已是中文；兜底仍用中文映射
+      conditionText: now.text || this.conditionToZh(condition),
       humidity: parseInt(now.humidity),
       windSpeed: parseInt(now.windSpeed),
       feelsLike: parseInt(now.feelsLike),
@@ -121,10 +123,15 @@ class WeatherService {
       throw new Error(`OpenWeatherMap API 错误: ${data.message}`)
     }
 
+    const condition = this.mapOpenWeatherCondition(data.weather[0].id)
+    const rawText = data.weather[0].description || ''
+    // lang=zh_cn 时已是中文；若仍是英文则用映射
+    const zh = this.conditionToZh(condition)
+    const isAsciiOnly = /^[\x00-\x7F\s]+$/.test(rawText)
     return {
       temperature: Math.round(data.main.temp),
-      condition: this.mapOpenWeatherCondition(data.weather[0].id),
-      conditionText: data.weather[0].description,
+      condition,
+      conditionText: rawText && !isAsciiOnly ? rawText : zh,
       humidity: data.main.humidity,
       windSpeed: Math.round(data.wind.speed * 3.6), // m/s 转 km/h
       feelsLike: Math.round(data.main.feels_like),
@@ -141,15 +148,35 @@ class WeatherService {
     const data = await response.json()
 
     const current = data.current_condition[0]
+    const condition = this.mapWttrCondition(current.weatherCode)
+    // wttr 默认英文（Partly cloudy 等），统一用中文
     return {
       temperature: parseInt(current.temp_C),
-      condition: this.mapWttrCondition(current.weatherCode),
-      conditionText: current.weatherDesc[0].value,
+      condition,
+      conditionText: this.conditionToZh(condition),
       humidity: parseInt(current.humidity),
       windSpeed: parseInt(current.windspeedKmph),
       feelsLike: parseInt(current.FeelsLikeC),
       provider: 'wttr'
     }
+  }
+
+  /** 条件码 → 中文（页面只显示中文） */
+  conditionToZh(condition) {
+    const map = {
+      sunny: '晴',
+      'clear-night': '晴',
+      partlycloudy: '多云',
+      cloudy: '阴',
+      rainy: '雨',
+      pouring: '大雨',
+      snowy: '雪',
+      fog: '雾',
+      windy: '大风',
+      lightning: '雷阵雨',
+      exceptional: '异常'
+    }
+    return map[condition] || '多云'
   }
 
   // 获取坐标（用于 IP 定位）

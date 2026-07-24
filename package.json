@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:ha": "bash ./deploy-to-ha.sh"
   },
   "keywords": [
     "three.js",
@@ -18,6 +19,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "html2canvas": "^1.4.1",
     "three": "^0.163.0"
   },
   "devDependencies": {

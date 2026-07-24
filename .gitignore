@@ -38,3 +38,7 @@ smoke.mjs
 
 # Duplicate model at repo root (canonical is public/models/huxingtu.glb)
 /huxingtu.glb
+
+ha-runtime-config.js
+
+public/ha-runtime-config.js

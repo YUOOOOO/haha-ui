@@ -59,7 +59,7 @@ class SceneManager {
     try {
       console.log('开始加载户型图模型...')
       
-      const result = await this.modelLoader.load('/models/huxingtu.glb', {
+      const result = await this.modelLoader.load(new URL('./models/huxingtu.glb', window.location.href).href, {
         enableShadows: true,
         scale: 10,  // 放大 10 倍
         position: { x: 0, y: 0, z: 0 },
